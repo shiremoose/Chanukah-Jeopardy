@@ -340,7 +340,7 @@
                 <div class="modal-body" id="modal-answer-text" style="font-size: 1.2rem;">Answer goes here...</div>
                 
                 <div class="award-section">
-                    <div style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 8px;">AWARD POINTS TO:</div>
+                    <div style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 8px;" id="award-instructions">AWARD POINTS TO:</div>
                     <div class="award-grid" id="award-buttons-container"></div>
                 </div>
             </div>
@@ -432,6 +432,8 @@
         };
 
         let currentClueValue = 0;
+        let isFinalJeopardy = false;
+        let finalWagers = {};
 
         if (localStorage.getItem('chanukah_jeopardy_live_data')) {
             try {
@@ -523,6 +525,7 @@
             renderBoard();
 
             currentClueValue = value;
+            isFinalJeopardy = false;
             const cat = gameData.categories[cIdx];
             const clue = cat.questions[rIdx];
 
@@ -535,11 +538,25 @@
         }
 
         function openFinalJeopardy() {
+            // Prompt each team for their wagers before showing the question
+            finalWagers = {};
+            gameData.teams.forEach((team, idx) => {
+                let maxWager = team.score > 0 ? team.score : 0;
+                let promptMsg = `${team.name}, you have $${team.score}.\nEnter your Final Jeopardy wager (0 to $${maxWager}):`;
+                let wagerInput = prompt(promptMsg, "0");
+                
+                let wager = parseInt(wagerInput);
+                if (isNaN(wager) || wager < 0) wager = 0;
+                if (wager > maxWager) wager = maxWager; // Cap at current score if they have points
+                
+                finalWagers[idx] = wager;
+            });
+
             gameData.finalUsed = true;
             saveState();
             renderBoard();
 
-            currentClueValue = 500;
+            isFinalJeopardy = true;
             document.getElementById('modal-category-title').innerText = "⭐ FINAL JEOPARDY ⭐";
             document.getElementById('modal-question-text').innerText = gameData.finalJeopardy.q;
             document.getElementById('modal-answer-text').innerText = gameData.finalJeopardy.a;
@@ -560,21 +577,52 @@
             document.getElementById('close-modal-btn').style.display = 'inline-block';
 
             const container = document.getElementById('award-buttons-container');
+            const instructions = document.getElementById('award-instructions');
             container.innerHTML = '';
 
-            gameData.teams.forEach((team, idx) => {
-                const btn = document.createElement('button');
-                btn.className = 'award-btn';
-                btn.innerText = `+ $${currentClueValue} to ${team.name}`;
-                btn.onclick = () => awardPointsAndClose(idx);
-                container.appendChild(btn);
-            });
+            if (isFinalJeopardy) {
+                instructions.innerText = "GRADE FINAL JEOPARDY WAGERS:";
+                gameData.teams.forEach((team, idx) => {
+                    let wager = finalWagers[idx] || 0;
+                    
+                    const correctBtn = document.createElement('button');
+                    correctBtn.className = 'award-btn';
+                    correctBtn.style.backgroundColor = '#22c55e';
+                    correctBtn.innerText = `✔️ ${team.name} Correct (+$${wager})`;
+                    correctBtn.onclick = () => resolveFinalWager(idx, true);
 
-            const nobodyBtn = document.createElement('button');
-            nobodyBtn.className = 'award-btn nobody';
-            nobodyBtn.innerText = 'Nobody Got It Right (0 Points)';
-            nobodyBtn.onclick = () => closeModal();
-            container.appendChild(nobodyBtn);
+                    const wrongBtn = document.createElement('button');
+                    wrongBtn.className = 'award-btn';
+                    wrongBtn.style.backgroundColor = '#ef4444';
+                    wrongBtn.innerText = `❌ ${team.name} Wrong (-$${wager})`;
+                    wrongBtn.onclick = () => resolveFinalWager(idx, false);
+
+                    container.appendChild(correctBtn);
+                    container.appendChild(wrongBtn);
+                });
+
+                const closeFjBtn = document.createElement('button');
+                closeFjBtn.className = 'award-btn nobody';
+                closeFjBtn.innerText = 'Done Grading / Close';
+                closeFjBtn.onclick = () => closeModal();
+                container.appendChild(closeFjBtn);
+
+            } else {
+                instructions.innerText = "AWARD POINTS TO:";
+                gameData.teams.forEach((team, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'award-btn';
+                    btn.innerText = `+ $${currentClueValue} to ${team.name}`;
+                    btn.onclick = () => awardPointsAndClose(idx);
+                    container.appendChild(btn);
+                });
+
+                const nobodyBtn = document.createElement('button');
+                nobodyBtn.className = 'award-btn nobody';
+                nobodyBtn.innerText = 'Nobody Got It Right (0 Points)';
+                nobodyBtn.onclick = () => closeModal();
+                container.appendChild(nobodyBtn);
+            }
         }
 
         function awardPointsAndClose(teamIdx) {
@@ -582,6 +630,25 @@
             saveState();
             renderScoreboard();
             closeModal();
+        }
+
+        function resolveFinalWager(teamIdx, isCorrect) {
+            let wager = finalWagers[teamIdx] || 0;
+            if (isCorrect) {
+                gameData.teams[teamIdx].score += wager;
+            } else {
+                gameData.teams[teamIdx].score -= wager;
+            }
+            saveState();
+            renderScoreboard();
+            
+            // Give visual feedback by disabling that team's buttons after grading
+            event.target.parentElement.querySelectorAll(`button`).forEach(btn => {
+                if(btn.innerText.includes(gameData.teams[teamIdx].name)) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.4';
+                }
+            });
         }
 
         function closeModal() {
