@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chanukah Jeopardy!</title>
+    <style>
+        :root {
+            --primary-blue: #060ce9;
+            --dark-blue: #020464;
+            --gold: #ffcc00;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--dark-blue);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--gold);
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px #000;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #d1d5db;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Teams Scoreboard */
+        .teams-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            padding: 10px 15px;
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .team-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--gold);
+            cursor: pointer;
+        }
+
+        .team-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .score-buttons button {
+            background: var(--gold);
+            border: none;
+            padding: 3px 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .score-buttons button:hover {
+            background: #e6b800;
+        }
+
+        /* Game Board */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .category-header {
+            background-color: var(--primary-blue);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .clue-cell {
+            background-color: var(--primary-blue);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .clue-cell:hover:not(.used) {
+            background-color: #1a237e;
+            transform: scale(1.03);
+        }
+
+        .clue-cell.used {
+            background-color: #111;
+            color: #444;
+            border-color: #333;
+            cursor: default;
+        }
+
+        /* Final Jeopardy Button Bar */
+        .final-jeopardy-bar {
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .final-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            border: 2px solid var(--gold);
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .final-btn:hover {
+            opacity: 0.9;
+        }
+
+        .final-btn.used {
+            background: #111;
+            color: #444;
+            border-color: #333;
+            cursor: default;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background-color: var(--gold);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            background-color: #e6b800;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background-color: var(--primary-blue);
+            border: 4px solid var(--gold);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h2 {
+            color: var(--gold);
+            margin-top: 0;
+        }
+
+        .modal-body {
+            font-size: 1.4rem;
+            margin: 25px 0;
+            line-height: 1.4;
+        }
+
+        /* Editor Modal */
+        .editor-modal .modal-content {
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .editor-group {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .editor-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .editor-group input, .editor-group textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            background: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🕯️ CHANUKAH JEOPARDY! 🕯️</h1>
+    <div class="subtitle">The Festival of Lights trivia challenge</div>
+
+    <!-- Scoreboard -->
+    <div class="teams-container" id="scoreboard"></div>
+
+    <!-- Game Board -->
+    <div class="board" id="game-board"></div>
+
+    <!-- Final Jeopardy Button -->
+    <div class="final-jeopardy-bar">
+        <button class="final-btn" id="final-jeopardy-trigger" onclick="openFinalJeopardy()">⭐ FINAL JEOPARDY ⭐</button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="controls">
+        <button class="btn" onclick="openEditor()">Edit Questions & Answers</button>
+        <button class="btn" onclick="resetGame()" style="background-color: #ef4444; color: white;">Reset Game</button>
+    </div>
+
+    <!-- Question Modal -->
+    <div class="modal" id="question-modal">
+        <div class="modal-content">
+            <h2 id="modal-category-title">Category</h2>
+            <div class="modal-body" id="modal-question-text">Question goes here...</div>
+            <div id="answer-container" style="display: none;">
+                <hr style="border-color: var(--gold); margin: 20px 0;">
+                <div style="font-size: 1.1rem; color: var(--gold); margin-bottom: 5px;">ANSWER:</div>
+                <div class="modal-body" id="modal-answer-text" style="font-size: 1.3rem;">Answer goes here...</div>
+            </div>
+            <div style="margin-top: 25px;">
+                <button class="btn" id="reveal-btn" onclick="revealAnswer()">Show Answer</button>
+                <button class="btn" id="close-modal-btn" onclick="closeModal()" style="display: none; background-color: #4ade80;">Back to Board</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor Modal -->
+    <div class="modal editor-modal" id="editor-modal">
+        <div class="modal-content">
+            <h2>Edit Game Content</h2>
+            <div id="editor-fields"></div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn" onclick="saveEditor()" style="background-color: #4ade80;">Save & Apply</button>
+                <button class="btn" onclick="closeEditor()" style="background-color: #ef4444; color: white;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameData = {
+            teams: [
+                { name: "Moishe and Rena", score: 0 },
+                { name: "Zalmy and Eli", score: 0 },
+                { name: "Atara, Sarah, Raphaella", score: 0 },
+                { name: "Rafi and Gavriel", score: 0 }
+            ],
+            categories: [
+                {
+                    name: "📜 CHANUKAH HISTORY",
+                    questions: [
+                        { q: "What ancient empire ruled over the Jewish people during the events leading to Chanukah?", a: "The Greek Empire" },
+                        { q: "Who led the rebellion?", a: "Yehudah Maccabee" },
+                        { q: "What was the name of the Jewish group that led the revolt?", a: "The Maccabees" },
+                        { q: "What is another name for the Maccabees?", a: "The Chashmonaim" },
+                        { q: "What does the word Chanukah mean?", a: "Dedication (The dedication of the second Beis Hamikdash)" }
+                    ]
+                },
+                {
+                    name: "🕎 CHANUKA NIGHT",
+                    questions: [
+                        { q: "What do we light every night?", a: "The Menorah" },
+                        { q: "What is the candle we use to light the other candles called?", a: "The Shamesh" },
+                        { q: "What are the three brachos we say on the first night?", a: "Lehadlik Ner, She'asah Nissim, and Shehecheyanu" },
+                        { q: "What are the two songs we say after lighting?", a: "Haneiros Hallalu and Ma'oz Tzur" },
+                        { q: "According to Beis Shammai how do we light the Menorah?", a: "Eight candles the first night and one candle the last night" }
+                    ]
+                },
+                {
+                    name: "🥔 CHANUKAH FOODS",
+                    questions: [
+                        { q: "What potato pancakes are traditionally eaten during Chanukah?", a: "Latkes" },
+                        { q: "What jelly-filled treats are popular during Chanukah (Hebrew name)?", a: "Sufganiyot" },
+                        { q: "What ingredient is especially important in traditional Chanukah foods because of the miracle?", a: "Oil" },
+                        { q: "What sweet topping is commonly served on latkes?", a: "Applesauce" },
+                        { q: "Why do we eat dairy on Chanukah?", a: "Because Yehuddis defeated the general by feeding him cheese and wine" }
+                    ]
+                },
+                {
+                    name: "🎲 DREIDEL & GAMES",
+                    questions: [
+                        { q: "How many sides does a dreidel have?", a: "Four" },
+                        { q: "What are the four Hebrew letters on a dreidel?", a: "Nun, Gimel, Hey, and Shin (or Peh in Israel)" },
+                        { q: "What does the letter Gimel mean in the dreidel game?", a: "Take the entire pot" },
+                        { q: "What do the letters on the dreidel stand for?", a: "Nes Gadol Haya Sham" },
+                        { q: "What does the dreidel phrase 'Nes Gadol Haya Sham' mean?", a: "A great miracle happened there." }
+                    ]
+                },
+                {
+                    name: "⭐ CHANUKAH CHALLENGE",
+                    questions: [
+                        { q: "What is the date when Chanukah begins?", a: "The 25th of Kislev" },
+                        { q: "What is the Hebrew word for oil?", a: "Shemen" },
+                        { q: "What is the Hebrew word for light?", a: "Ohr" },
+                        { q: "How many candles are needed to light all eight nights, not counting the shamash?", a: "36 candles" },
+                        { q: "Because Chanukah falls on late November or late December what hybrid holiday happened in 2013?", a: "Thanksgivukah" }
+                    ]
+                }
+            ],
+            finalJeopardy: {
+                q: "What was the name of the Jewish family that led the revolt against the Seleucid Greeks?",
+                a: "The Maccabees."
+            },
+            usedClues: {},
+            finalUsed: false
+        };
+
+        if (localStorage.getItem('chanukah_jeopardy_live_data')) {
+            try {
+                gameData = JSON.parse(localStorage.getItem('chanukah_jeopardy_live_data'));
+            } catch (e) { console.error(e); }
+        }
+
+        function saveState() {
+            localStorage.setItem('chanukah_jeopardy_live_data', JSON.stringify(gameData));
+        }
+
+        function renderBoard() {
+            renderScoreboard();
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+
+            gameData.categories.forEach((cat) => {
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                header.innerText = cat.name;
+                board.appendChild(header);
+            });
+
+            for (let r = 0; r < 5; r++) {
+                const value = (r + 1) * 100;
+                gameData.categories.forEach((cat, cIdx) => {
+                    const cell = document.createElement('div');
+                    const clueKey = `${cIdx}-${r}`;
+                    cell.className = 'clue-cell';
+                    
+                    if (gameData.usedClues[clueKey]) {
+                        cell.classList.add('used');
+                        cell.innerText = '';
+                    } else {
+                        cell.innerText = `$${value}`;
+                        cell.onclick = () => openClue(cIdx, r, value);
+                    }
+                    board.appendChild(cell);
+                });
+            }
+
+            const finalBtn = document.getElementById('final-jeopardy-trigger');
+            if (gameData.finalUsed) {
+                finalBtn.classList.add('used');
+                finalBtn.innerText = '⭐ FINAL JEOPARDY (Played) ⭐';
+            } else {
+                finalBtn.classList.remove('used');
+                finalBtn.innerText = '⭐ FINAL JEOPARDY ⭐';
+            }
+        }
+
+        function renderScoreboard() {
+            const sb = document.getElementById('scoreboard');
+            sb.innerHTML = '';
+            gameData.teams.forEach((team, idx) => {
+                const card = document.createElement('div');
+                card.className = 'team-card';
+                card.innerHTML = `
+                    <div class="team-name" onclick="editTeamName(${idx})">${team.name} ✏️</div>
+                    <div class="team-score">$${team.score}</div>
+                    <div class="score-buttons">
+                        <button onclick="adjustScore(${idx}, -100)">-</button>
+                        <button onclick="adjustScore(${idx}, 100)">+</button>
+                    </div>
+                `;
+                sb.appendChild(card);
+            });
+        }
+
+        function adjustScore(teamIdx, amount) {
+            gameData.teams[teamIdx].score += amount;
+            saveState();
+            renderScoreboard();
+        }
+
+        function editTeamName(teamIdx) {
+            const newName = prompt("Enter new team name:", gameData.teams[teamIdx].name);
+            if (newName !== null && newName.trim() !== "") {
+                gameData.teams[teamIdx].name = newName.trim();
+                saveState();
+                renderScoreboard();
+            }
+        }
+
+        function openClue(cIdx, rIdx, value) {
+            const clueKey = `${cIdx}-${rIdx}`;
+            gameData.usedClues[clueKey] = true;
+            saveState();
+            renderBoard();
+
+            const cat = gameData.categories[cIdx];
+            const clue = cat.questions[rIdx];
+
+            document.getElementById('modal-category-title').innerText = `${cat.name} - $${value}`;
+            document.getElementById('modal-question-text').innerText = clue.q;
+            document.getElementById('modal-answer-text').innerText = clue.a;
+            
+            resetModalView();
+            document.getElementById('question-modal').style.display = 'flex';
+        }
+
+        function openFinalJeopardy() {
+            gameData.finalUsed = true;
+            saveState();
+            renderBoard();
+
+            document.getElementById('modal-category-title').innerText = "⭐ FINAL JEOPARDY ⭐";
+            document.getElementById('modal-question-text').innerText = gameData.finalJeopardy.q;
+            document.getElementById('modal-answer-text').innerText = gameData.finalJeopardy.a;
+            
+            resetModalView();
+            document.getElementById('question-modal').style.display = 'flex';
+        }
+
+        function resetModalView() {
+            document.getElementById('answer-container').style.display = 'none';
+            document.getElementById('reveal-btn').style.display = 'inline-block';
+            document.getElementById('close-modal-btn').style.display = 'none';
+        }
+
+        function revealAnswer() {
+            document.getElementById('answer-container').style.display = 'block';
+            document.getElementById('reveal-btn').style.display = 'none';
+            document.getElementById('close-modal-btn').style.display = 'inline-block';
+        }
+
+        function closeModal() {
+            document.getElementById('question-modal').style.display = 'none';
+        }
+
+        function resetGame() {
+            if (confirm("Are you sure you want to reset all scores and revealed clues?")) {
+                gameData.usedClues = {};
+                gameData.finalUsed = false;
+                gameData.teams.forEach(t => t.score = 0);
+                saveState();
+                renderBoard();
+            }
+        }
+
+        function openEditor() {
+            const container = document.getElementById('editor-fields');
+            let html = `
+                <div class="editor-group">
+                    <label>⭐ Final Jeopardy Question:</label>
+                    <input type="text" id="fj-q" value="${escapeHtml(gameData.finalJeopardy.q)}">
+                    <label>⭐ Final Jeopardy Answer:</label>
+                    <input type="text" id="fj-a" value="${escapeHtml(gameData.finalJeopardy.a)}">
+                </div>
+            `;
+
+            gameData.categories.forEach((cat, cIdx) => {
+                html += `<div class="editor-group">
+                    <label>Category ${cIdx + 1} Name:</label>
+                    <input type="text" id="cat-name-${cIdx}" value="${escapeHtml(cat.name)}">`;
+                
+                cat.questions.forEach((item, qIdx) => {
+                    const val = (qIdx + 1) * 100;
+                    html += `
+                        <label>$${val} Question:</label>
+                        <input type="text" id="cat-${cIdx}-q-${qIdx}" value="${escapeHtml(item.q)}">
+                        <label>$${val} Answer:</label>
+                        <input type="text" id="cat-${cIdx}-a-${qIdx}" value="${escapeHtml(item.a)}">
+                    `;
+                });
+                html += `</div>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('editor-modal').style.display = 'flex';
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-modal').style.display = 'none';
+        }
+
+        function saveEditor() {
+            const fjQ = document.getElementById('fj-q');
+            const fjA = document.getElementById('fj-a');
+            if (fjQ) gameData.finalJeopardy.q = fjQ.value;
+            if (fjA) gameData.finalJeopardy.a = fjA.value;
+
+            gameData.categories.forEach((cat, cIdx) => {
+                const catNameInput = document.getElementById(`cat-name-${cIdx}`);
+                if (catNameInput) cat.name = catNameInput.value;
+
+                cat.questions.forEach((item, qIdx) => {
+                    const qInput = document.getElementById(`cat-${cIdx}-q-${qIdx}`);
+                    const aInput = document.getElementById(`cat-${cIdx}-a-${qIdx}`);
+                    if (qInput) item.q = qInput.value;
+                    if (aInput) item.a = aInput.value;
+                });
+            });
+
+            saveState();
+            closeEditor();
+            renderBoard();
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/"/g, '&quot;');
+        }
+
+        renderBoard();
+    </script>
+</body>
+</html>
