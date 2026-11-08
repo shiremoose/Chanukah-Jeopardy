@@ -6,15 +6,17 @@
     <title>Chanukah Jeopardy!</title>
     <style>
         :root {
-            --primary-blue: #060ce9;
-            --dark-blue: #020464;
-            --gold: #ffcc00;
+            --bg-color: #121417;          /* Soft dark charcoal background */
+            --card-bg: #1e222a;           /* Muted slate blue for board and cards */
+            --card-border: #363c4a;       /* Subtle border */
+            --text-main: #e2e8f0;         /* Soft off-white for text */
+            --accent-gold: #f6d860;       /* Softer, warm gold */
         }
 
         body {
             font-family: 'Arial', sans-serif;
-            background-color: var(--dark-blue);
-            color: #ffffff;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -23,17 +25,17 @@
         }
 
         h1 {
-            color: var(--gold);
+            color: var(--accent-gold);
             text-align: center;
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             margin-bottom: 5px;
-            text-shadow: 2px 2px #000;
+            font-weight: 600;
         }
 
         .subtitle {
             text-align: center;
-            color: #d1d5db;
-            margin-bottom: 20px;
+            color: #94a3b8;
+            margin-bottom: 25px;
             font-style: italic;
         }
 
@@ -47,10 +49,10 @@
         }
 
         .team-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid var(--gold);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 8px;
-            padding: 10px 15px;
+            padding: 12px 18px;
             text-align: center;
             min-width: 140px;
         }
@@ -59,20 +61,22 @@
             font-weight: bold;
             font-size: 0.9rem;
             margin-bottom: 5px;
-            color: var(--gold);
+            color: var(--accent-gold);
             cursor: pointer;
         }
 
         .team-score {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
             margin-bottom: 8px;
+            color: var(--text-main);
         }
 
         .score-buttons button {
-            background: var(--gold);
-            border: none;
-            padding: 3px 8px;
+            background: #2a303c;
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            padding: 4px 10px;
             font-weight: bold;
             cursor: pointer;
             border-radius: 4px;
@@ -80,7 +84,7 @@
         }
 
         .score-buttons button:hover {
-            background: #e6b800;
+            background: #363c4a;
         }
 
         /* Game Board */
@@ -94,45 +98,43 @@
         }
 
         .category-header {
-            background-color: var(--primary-blue);
-            color: var(--gold);
-            border: 2px solid var(--gold);
+            background-color: var(--card-bg);
+            color: var(--accent-gold);
+            border: 1px solid var(--card-border);
             padding: 15px 10px;
             text-align: center;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .clue-cell {
-            background-color: var(--primary-blue);
-            color: var(--gold);
-            border: 2px solid var(--gold);
+            background-color: var(--card-bg);
+            color: var(--accent-gold);
+            border: 1px solid var(--card-border);
             height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
             cursor: pointer;
             border-radius: 6px;
-            transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background-color 0.15s, transform 0.1s;
         }
 
         .clue-cell:hover:not(.used) {
-            background-color: #1a237e;
-            transform: scale(1.03);
+            background-color: #262c38;
+            transform: scale(1.02);
         }
 
         .clue-cell.used {
-            background-color: #111;
-            color: #444;
-            border-color: #333;
+            background-color: #0b0c0e;
+            color: #374151;
+            border-color: #1a1d24;
             cursor: default;
         }
 
@@ -145,26 +147,25 @@
         }
 
         .final-btn {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #fff;
-            border: 2px solid var(--gold);
+            background: #1e222a;
+            color: var(--accent-gold);
+            border: 1px solid var(--card-border);
             width: 100%;
-            padding: 15px;
-            font-size: 1.2rem;
+            padding: 14px;
+            font-size: 1.1rem;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .final-btn:hover {
-            opacity: 0.9;
+            background: #262c38;
         }
 
         .final-btn.used {
-            background: #111;
-            color: #444;
-            border-color: #333;
+            background: #0b0c0e;
+            color: #374151;
+            border-color: #1a1d24;
             cursor: default;
         }
 
@@ -178,19 +179,18 @@
         }
 
         .btn {
-            background-color: var(--gold);
-            color: #000;
-            border: none;
+            background-color: #2a303c;
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
             padding: 10px 20px;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
             border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
         .btn:hover {
-            background-color: #e6b800;
+            background-color: #363c4a;
         }
 
         /* Modals */
@@ -201,7 +201,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -210,8 +210,8 @@
         }
 
         .modal-content {
-            background-color: var(--primary-blue);
-            border: 4px solid var(--gold);
+            background-color: #181c24;
+            border: 1px solid var(--card-border);
             padding: 30px;
             border-radius: 12px;
             max-width: 650px;
@@ -223,7 +223,7 @@
         }
 
         .modal-content h2 {
-            color: var(--gold);
+            color: var(--accent-gold);
             margin-top: 0;
         }
 
@@ -231,12 +231,13 @@
             font-size: 1.3rem;
             margin: 20px 0;
             line-height: 1.4;
+            color: var(--text-main);
         }
 
         /* Award buttons grid inside modal */
         .award-section {
             margin-top: 20px;
-            border-top: 2px dashed var(--gold);
+            border-top: 1px dashed var(--card-border);
             padding-top: 15px;
         }
 
@@ -248,7 +249,7 @@
         }
 
         .award-btn {
-            background-color: #4ade80;
+            background-color: #22c55e;
             color: #000;
             border: none;
             padding: 10px;
@@ -259,16 +260,17 @@
         }
 
         .award-btn:hover {
-            background-color: #22c55e;
+            background-color: #16a34a;
         }
 
         .award-btn.nobody {
-            background-color: #9ca3af;
+            background-color: #374151;
+            color: #e5e7eb;
             grid-column: span 2;
         }
 
         .award-btn.nobody:hover {
-            background-color: #6b7280;
+            background-color: #4b5563;
         }
 
         /* Editor Modal */
@@ -278,18 +280,19 @@
         }
 
         .editor-group {
-            background: rgba(0,0,0,0.2);
+            background: #121417;
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid var(--card-border);
         }
 
         .editor-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: var(--gold);
+            color: var(--accent-gold);
+            font-size: 0.9rem;
         }
 
         .editor-group input, .editor-group textarea {
@@ -297,10 +300,10 @@
             padding: 8px;
             margin-bottom: 10px;
             border-radius: 4px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--card-border);
             box-sizing: border-box;
-            background: #fff;
-            color: #000;
+            background: #1e222a;
+            color: var(--text-main);
         }
     </style>
 </head>
@@ -323,7 +326,7 @@
     <!-- Action Buttons -->
     <div class="controls">
         <button class="btn" onclick="openEditor()">Edit Questions & Answers</button>
-        <button class="btn" onclick="resetGame()" style="background-color: #ef4444; color: white;">Reset Game</button>
+        <button class="btn" onclick="resetGame()" style="background-color: #451a03; color: #fecaca; border-color: #7f1d1d;">Reset Game</button>
     </div>
 
     <!-- Question Modal -->
@@ -332,18 +335,18 @@
             <h2 id="modal-category-title">Category</h2>
             <div class="modal-body" id="modal-question-text">Question goes here...</div>
             <div id="answer-container" style="display: none;">
-                <hr style="border-color: var(--gold); margin: 20px 0;">
-                <div style="font-size: 1.1rem; color: var(--gold); margin-bottom: 5px;">ANSWER:</div>
+                <hr style="border-color: var(--card-border); margin: 20px 0;">
+                <div style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 5px;">ANSWER:</div>
                 <div class="modal-body" id="modal-answer-text" style="font-size: 1.2rem;">Answer goes here...</div>
                 
                 <div class="award-section">
-                    <div style="font-size: 1rem; color: var(--gold); margin-bottom: 8px;">AWARD POINTS TO:</div>
+                    <div style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 8px;">AWARD POINTS TO:</div>
                     <div class="award-grid" id="award-buttons-container"></div>
                 </div>
             </div>
             <div style="margin-top: 20px;">
                 <button class="btn" id="reveal-btn" onclick="revealAnswer()">Show Answer</button>
-                <button class="btn" id="close-modal-btn" onclick="closeModal()" style="display: none; background-color: #ef4444; color: white;">Cancel / Close</button>
+                <button class="btn" id="close-modal-btn" onclick="closeModal()" style="display: none; background-color: #374151;">Cancel / Close</button>
             </div>
         </div>
     </div>
@@ -354,8 +357,8 @@
             <h2>Edit Game Content</h2>
             <div id="editor-fields"></div>
             <div style="text-align: right; margin-top: 20px;">
-                <button class="btn" onclick="saveEditor()" style="background-color: #4ade80;">Save & Apply</button>
-                <button class="btn" onclick="closeEditor()" style="background-color: #ef4444; color: white;">Cancel</button>
+                <button class="btn" onclick="saveEditor()" style="background-color: #166534; color: #fff;">Save & Apply</button>
+                <button class="btn" onclick="closeEditor()" style="background-color: #451a03; color: #fecaca;">Cancel</button>
             </div>
         </div>
     </div>
@@ -509,7 +512,7 @@
             if (newName !== null && newName.trim() !== "") {
                 gameData.teams[teamIdx].name = newName.trim();
                 saveState();
-                renderBoard();
+                renderScoreboard();
             }
         }
 
@@ -536,7 +539,7 @@
             saveState();
             renderBoard();
 
-            currentClueValue = 500; // Default or customizable value for final round
+            currentClueValue = 500;
             document.getElementById('modal-category-title').innerText = "⭐ FINAL JEOPARDY ⭐";
             document.getElementById('modal-question-text').innerText = gameData.finalJeopardy.q;
             document.getElementById('modal-answer-text').innerText = gameData.finalJeopardy.a;
@@ -556,7 +559,6 @@
             document.getElementById('reveal-btn').style.display = 'none';
             document.getElementById('close-modal-btn').style.display = 'inline-block';
 
-            // Populate award buttons dynamically based on active teams
             const container = document.getElementById('award-buttons-container');
             container.innerHTML = '';
 
@@ -621,7 +623,7 @@
                         <input type="text" id="cat-${cIdx}-a-${qIdx}" value="${escapeHtml(item.a)}">
                     `;
                 });
-                html += `endCat</div>`;
+                html += `</div>`;
             });
             container.innerHTML = html;
             document.getElementById('editor-modal').style.display = 'flex';
