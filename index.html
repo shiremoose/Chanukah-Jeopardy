@@ -6,11 +6,11 @@
     <title>Chanukah Jeopardy!</title>
     <style>
         :root {
-            --bg-color: #0c1633;          /* Deep rich navy blue background */
-            --card-bg: #15295c;           /* Vibrant blue for board and cards */
-            --card-border: #27448c;       /* Slightly lighter blue border */
-            --text-main: #ffffff;         /* Crisp white for text */
-            --accent-gold: #fbc531;       /* Bright Jeopardy gold */
+            --bg-color: #0c1633;
+            --card-bg: #15295c;
+            --card-border: #27448c;
+            --text-main: #ffffff;
+            --accent-gold: #fbc531;
         }
 
         body {
@@ -40,7 +40,6 @@
             font-style: italic;
         }
 
-        /* Teams Scoreboard */
         .teams-container {
             display: flex;
             gap: 15px;
@@ -50,7 +49,7 @@
         }
 
         .team-card {
-            background: #ffffff;          /* White team card background as in picture */
+            background: #ffffff;
             border: 2px solid var(--accent-gold);
             border-radius: 12px;
             padding: 12px 18px;
@@ -89,7 +88,6 @@
             background: #dfe4ea;
         }
 
-        /* Game Board */
         .board {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -143,7 +141,6 @@
             box-shadow: none;
         }
 
-        /* Final Jeopardy Button Bar */
         .final-jeopardy-bar {
             width: 100%;
             max-width: 1000px;
@@ -175,7 +172,6 @@
             cursor: default;
         }
 
-        /* Controls */
         .controls {
             display: flex;
             gap: 15px;
@@ -199,7 +195,6 @@
             background-color: #1c3577;
         }
 
-        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -240,7 +235,6 @@
             color: var(--text-main);
         }
 
-        /* Award buttons grid inside modal */
         .award-section {
             margin-top: 20px;
             border-top: 1px dashed var(--card-border);
@@ -279,7 +273,6 @@
             background-color: #38526f;
         }
 
-        /* Editor Modal */
         .editor-modal .modal-content {
             max-width: 800px;
             text-align: left;
@@ -318,24 +311,19 @@
     <h1>🕯️ CHANUKAH JEOPARDY! 🕯️</h1>
     <div class="subtitle">The Festival of Lights trivia challenge</div>
 
-    <!-- Scoreboard -->
     <div class="teams-container" id="scoreboard"></div>
 
-    <!-- Game Board -->
     <div class="board" id="game-board"></div>
 
-    <!-- Final Jeopardy Button -->
     <div class="final-jeopardy-bar">
         <button class="final-btn" id="final-jeopardy-trigger" onclick="openFinalJeopardy()">⭐ FINAL JEOPARDY ⭐</button>
     </div>
 
-    <!-- Action Buttons -->
     <div class="controls">
         <button class="btn" onclick="openEditor()">Edit Questions & Answers</button>
         <button class="btn" onclick="resetGame()" style="background-color: #6c221f; color: #ffcccc; border-color: #a93226;">Reset Game</button>
     </div>
 
-    <!-- Question Modal -->
     <div class="modal" id="question-modal">
         <div class="modal-content">
             <h2 id="modal-category-title">Category</h2>
@@ -344,7 +332,7 @@
                 <hr style="border-color: var(--card-border); margin: 20px 0;">
                 <div style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 5px;">ANSWER:</div>
                 <div class="modal-body" id="modal-answer-text" style="font-size: 1.2rem;">Answer goes here...</div>
-                
+
                 <div class="award-section">
                     <div style="font-size: 0.95rem; color: #dcdde1; margin-bottom: 8px;" id="award-instructions">AWARD POINTS TO:</div>
                     <div class="award-grid" id="award-buttons-container"></div>
@@ -357,7 +345,6 @@
         </div>
     </div>
 
-    <!-- Editor Modal -->
     <div class="modal editor-modal" id="editor-modal">
         <div class="modal-content">
             <h2>Edit Game Content</h2>
@@ -441,6 +428,21 @@
         let isFinalJeopardy = false;
         let finalWagers = {};
 
+        // ---- Final Jeopardy music ----
+        // Keep final-jeopardy.mp3 in the same folder as this HTML file.
+        const FINAL_MUSIC_FILE = 'final-jeopardy.mp3';
+        let finalMusic = null;
+
+        function playFinalMusic() {
+            stopFinalMusic();
+            finalMusic = new Audio(FINAL_MUSIC_FILE);
+            finalMusic.play().catch(e => console.error('Audio failed to play:', e));
+        }
+
+        function stopFinalMusic() {
+            if (finalMusic) { finalMusic.pause(); finalMusic.currentTime = 0; finalMusic = null; }
+        }
+
         if (localStorage.getItem('chanukah_jeopardy_live_data')) {
             try {
                 gameData = JSON.parse(localStorage.getItem('chanukah_jeopardy_live_data'));
@@ -469,7 +471,7 @@
                     const cell = document.createElement('div');
                     const clueKey = `${cIdx}-${r}`;
                     cell.className = 'clue-cell';
-                    
+
                     if (gameData.usedClues[clueKey]) {
                         cell.classList.add('used');
                         cell.innerText = '';
@@ -538,7 +540,7 @@
             document.getElementById('modal-category-title').innerText = `${cat.name} - $${value}`;
             document.getElementById('modal-question-text').innerText = clue.q;
             document.getElementById('modal-answer-text').innerText = clue.a;
-            
+
             resetModalView();
             document.getElementById('question-modal').style.display = 'flex';
         }
@@ -549,11 +551,11 @@
                 let maxWager = team.score > 0 ? team.score : 0;
                 let promptMsg = `${team.name}, you have $${team.score}.\nEnter your Final Jeopardy wager (0 to $${maxWager}):`;
                 let wagerInput = prompt(promptMsg, "0");
-                
+
                 let wager = parseInt(wagerInput);
                 if (isNaN(wager) || wager < 0) wager = 0;
                 if (wager > maxWager) wager = maxWager;
-                
+
                 finalWagers[idx] = wager;
             });
 
@@ -565,9 +567,10 @@
             document.getElementById('modal-category-title').innerText = "⭐ FINAL JEOPARDY ⭐";
             document.getElementById('modal-question-text').innerText = gameData.finalJeopardy.q;
             document.getElementById('modal-answer-text').innerText = gameData.finalJeopardy.a;
-            
+
             resetModalView();
             document.getElementById('question-modal').style.display = 'flex';
+            playFinalMusic();
         }
 
         function resetModalView() {
@@ -577,6 +580,7 @@
         }
 
         function revealAnswer() {
+            stopFinalMusic();
             document.getElementById('answer-container').style.display = 'block';
             document.getElementById('reveal-btn').style.display = 'none';
             document.getElementById('close-modal-btn').style.display = 'inline-block';
@@ -589,18 +593,18 @@
                 instructions.innerText = "GRADE FINAL JEOPARDY WAGERS:";
                 gameData.teams.forEach((team, idx) => {
                     let wager = finalWagers[idx] || 0;
-                    
+
                     const correctBtn = document.createElement('button');
                     correctBtn.className = 'award-btn';
                     correctBtn.style.backgroundColor = '#2ecc71';
                     correctBtn.innerText = `✔️ ${team.name} Correct (+$${wager})`;
-                    correctBtn.onclick = () => resolveFinalWager(idx, true);
+                    correctBtn.onclick = (e) => resolveFinalWager(idx, true, e);
 
                     const wrongBtn = document.createElement('button');
                     wrongBtn.className = 'award-btn';
                     wrongBtn.style.backgroundColor = '#e74c3c';
                     wrongBtn.innerText = `❌ ${team.name} Wrong (-$${wager})`;
-                    wrongBtn.onclick = () => resolveFinalWager(idx, false);
+                    wrongBtn.onclick = (e) => resolveFinalWager(idx, false, e);
 
                     container.appendChild(correctBtn);
                     container.appendChild(wrongBtn);
@@ -637,7 +641,7 @@
             closeModal();
         }
 
-        function resolveFinalWager(teamIdx, isCorrect) {
+        function resolveFinalWager(teamIdx, isCorrect, e) {
             let wager = finalWagers[teamIdx] || 0;
             if (isCorrect) {
                 gameData.teams[teamIdx].score += wager;
@@ -646,9 +650,9 @@
             }
             saveState();
             renderScoreboard();
-            
-            event.target.parentElement.querySelectorAll(`button`).forEach(btn => {
-                if(btn.innerText.includes(gameData.teams[teamIdx].name)) {
+
+            e.target.parentElement.querySelectorAll(`button`).forEach(btn => {
+                if (btn.innerText.includes(gameData.teams[teamIdx].name)) {
                     btn.disabled = true;
                     btn.style.opacity = '0.4';
                 }
@@ -656,6 +660,7 @@
         }
 
         function closeModal() {
+            stopFinalMusic();
             document.getElementById('question-modal').style.display = 'none';
         }
 
@@ -684,7 +689,7 @@
                 html += `<div class="editor-group">
                     <label>Category ${cIdx + 1} Name:</label>
                     <input type="text" id="cat-name-${cIdx}" value="${escapeHtml(cat.name)}">`;
-                
+
                 cat.questions.forEach((item, qIdx) => {
                     const val = (qIdx + 1) * 100;
                     html += `
