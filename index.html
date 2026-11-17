@@ -50,7 +50,7 @@
         }
 
         .team-card {
-            background: #ffffff;
+            background: #ffffff;          /* White team card background as in picture */
             border: 2px solid var(--accent-gold);
             border-radius: 12px;
             padding: 12px 18px;
@@ -340,7 +340,6 @@
         <div class="modal-content">
             <h2 id="modal-category-title">Category</h2>
             <div class="modal-body" id="modal-question-text">Question goes here...</div>
-            
             <div id="answer-container" style="display: none;">
                 <hr style="border-color: var(--card-border); margin: 20px 0;">
                 <div style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 5px;">ANSWER:</div>
@@ -351,7 +350,6 @@
                     <div class="award-grid" id="award-buttons-container"></div>
                 </div>
             </div>
-
             <div style="margin-top: 20px;">
                 <button class="btn" id="reveal-btn" onclick="revealAnswer()">Show Answer</button>
                 <button class="btn" id="close-modal-btn" onclick="closeModal()" style="display: none; background-color: #4b6584;">Cancel / Close</button>
@@ -371,107 +369,369 @@
         </div>
     </div>
 
-<script>
-    let gameData = {
-        teams: [
-            { name: "Moishe and Rena", score: 0 },
-            { name: "Zalmy and Eli", score: 0 },
-            { name: "Atara, Sarah, Raphaella", score: 0 },
-            { name: "Rafi and Gavriel", score: 0 }
-        ],
-        categories: [
-            {
-                name: "📜 CHANUKAH HISTORY",
-                questions: [
-                    { q: "What ancient empire ruled over the Jewish people during the events leading to Chanukah?", a: "The Greek Empire" },
-                    { q: "Who led the rebellion?", a: "Yehudah Maccabee" },
-                    { q: "What was the name of the Jewish group that led the revolt?", a: "The Maccabees" },
-                    { q: "What is another name for the Maccabees?", a: "The Chashmonaim" },
-                    { q: "What does the word Chanukah mean?", a: "Dedication (The dedication of the second Beis Hamikdash)" }
-                ]
+    <script>
+        let gameData = {
+            teams: [
+                { name: "Moishe and Rena", score: 0 },
+                { name: "Zalmy and Eli", score: 0 },
+                { name: "Atara, Sarah, Raphaella", score: 0 },
+                { name: "Rafi and Gavriel", score: 0 }
+            ],
+            categories: [
+                {
+                    name: "📜 CHANUKAH HISTORY",
+                    questions: [
+                        { q: "What ancient empire ruled over the Jewish people during the events leading to Chanukah?", a: "The Greek Empire" },
+                        { q: "Who led the rebellion?", a: "Yehudah Maccabee" },
+                        { q: "What was the name of the Jewish group that led the revolt?", a: "The Maccabees" },
+                        { q: "What is another name for the Maccabees?", a: "The Chashmonaim" },
+                        { q: "What does the word Chanukah mean?", a: "Dedication (The dedication of the second Beis Hamikdash)" }
+                    ]
+                },
+                {
+                    name: "🕎 CHANUKA NIGHT",
+                    questions: [
+                        { q: "What do we light every night?", a: "The Menorah" },
+                        { q: "What is the candle we use to light the other candles called?", a: "The Shamesh" },
+                        { q: "What are the three brachos we say on the first night?", a: "Lehadlik Ner, She'asah Nissim, and Shehecheyanu" },
+                        { q: "What are the two songs we say after lighting?", a: "Haneiros Hallalu and Ma'oz Tzur" },
+                        { q: "According to Beis Shammai how do we light the Menorah?", a: "Eight candles the first night and one candle the last night" }
+                    ]
+                },
+                {
+                    name: "🥔 CHANUKAH FOODS",
+                    questions: [
+                        { q: "What potato pancakes are traditionally eaten during Chanukah?", a: "Latkes" },
+                        { q: "What jelly-filled treats are popular during Chanukah (Hebrew name)?", a: "Sufganiyot" },
+                        { q: "What ingredient is especially important in traditional Chanukah foods because of the miracle?", a: "Oil" },
+                        { q: "What sweet topping is commonly served on latkes?", a: "Applesauce" },
+                        { q: "Why do we eat dairy on Chanukah?", a: "Because Yehuddis defeated the general by feeding him cheese and wine" }
+                    ]
+                },
+                {
+                    name: "🎲 DREIDEL & GAMES",
+                    questions: [
+                        { q: "How many sides does a dreidel have?", a: "Four" },
+                        { q: "What are the four Hebrew letters on a dreidel?", a: "Nun, Gimel, Hey, and Shin (or Peh in Israel)" },
+                        { q: "What does the letter Gimel mean in the dreidel game?", a: "Take the entire pot" },
+                        { q: "What do the letters on the dreidel stand for?", a: "Nes Gadol Haya Sham" },
+                        { q: "What does the dreidel phrase 'Nes Gadol Haya Sham' mean?", a: "A great miracle happened there." }
+                    ]
+                },
+                {
+                    name: "⭐ CHANUKAH CHALLENGE",
+                    questions: [
+                        { q: "What is the date when Chanukah begins?", a: "The 25th of Kislev" },
+                        { q: "What is the Hebrew word for oil?", a: "Shemen" },
+                        { q: "What is the Hebrew word for light?", a: "Ohr" },
+                        { q: "How many candles are needed to light all eight nights, not counting the shamash?", a: "36 candles" },
+                        { q: "Because Chanukah falls on late November or late December what hybrid holiday happened in 2013?", a: "Thanksgivukah" }
+                    ]
+                }
+            ],
+            finalJeopardy: {
+                q: "What was the name of the Jewish family that led the revolt against the Seleucid Greeks?",
+                a: "The Maccabees."
             },
-            {
-                name: "🕎 CHANUKA NIGHT",
-                questions: [
-                    { q: "What do we light every night?", a: "The Menorah" },
-                    { q: "What is the candle we use to light the other candles called?", a: "The Shamesh" },
-                    { q: "What are the three brachos we say on the first night?", a: "Lehadlik Ner, She'asah Nissim, and Shehecheyanu" },
-                    { q: "What are the two songs we say after lighting?", a: "Haneiros Hallalu and Ma'oz Tzur" },
-                    { q: "According to Beis Shammai how do we light the Menorah?", a: "Eight candles the first night and one candle the last night" }
-                ]
-            },
-            {
-                name: "🥔 CHANUKAH FOODS",
-                questions: [
-                    { q: "What potato pancakes are traditionally eaten during Chanukah?", a: "Latkes" },
-                    { q: "What jelly-filled treats are popular during Chanukah (Hebrew name)?", a: "Sufganiyot" },
-                    { q: "What ingredient is especially important in traditional Chanukah foods because of the miracle?", a: "Oil" },
-                    { q: "What sweet topping is commonly served on latkes?", a: "Applesauce" },
-                    { q: "Why do we eat dairy on Chanukah?", a: "Because Yehuddis defeated the general by feeding him cheese and wine" }
-                ]
-            },
-            {
-                name: "🎲 DREIDEL & GAMES",
-                questions: [
-                    { q: "How many sides does a dreidel have?", a: "Four" },
-                    { q: "What are the four Hebrew letters on a dreidel?", a: "Nun, Gimel, Hey, and Shin (or Peh in Israel)" },
-                    { q: "What does the letter Gimel mean in the dreidel game?", a: "Take the entire pot" },
-                    { q: "What do the letters on the dreidel stand for?", a: "Nes Gadol Haya Sham" },
-                    { q: "What does the dreidel phrase 'Nes Gadol Haya Sham' mean?", a: "A great miracle happened there." }
-                ]
-            },
-            {
-                name: "⭐ CHANUKAH CHALLENGE",
-                questions: [
-                    { q: "What is the date when Chanukah begins?", a: "The 25th of Kislev" },
-                    { q: "What is the Hebrew word for oil?", a: "Shemen" },
-                    { q: "What is the Hebrew word for light?", a: "Ohr" },
-                    { q: "How many candles are needed to light all eight nights, not counting the shamash?", a: "36 candles" },
-                    { q: "Because Chanukah falls on late November or late December what hybrid holiday happened in 2013?", a: "Thanksgivukah" }
-                ]
+            usedClues: {},
+            finalUsed: false
+        };
+
+        let currentClueValue = 0;
+        let isFinalJeopardy = false;
+        let finalWagers = {};
+
+        if (localStorage.getItem('chanukah_jeopardy_live_data')) {
+            try {
+                gameData = JSON.parse(localStorage.getItem('chanukah_jeopardy_live_data'));
+            } catch (e) { console.error(e); }
+        }
+
+        function saveState() {
+            localStorage.setItem('chanukah_jeopardy_live_data', JSON.stringify(gameData));
+        }
+
+        function renderBoard() {
+            renderScoreboard();
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+
+            gameData.categories.forEach((cat) => {
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                header.innerText = cat.name;
+                board.appendChild(header);
+            });
+
+            for (let r = 0; r < 5; r++) {
+                const value = (r + 1) * 100;
+                gameData.categories.forEach((cat, cIdx) => {
+                    const cell = document.createElement('div');
+                    const clueKey = `${cIdx}-${r}`;
+                    cell.className = 'clue-cell';
+                    
+                    if (gameData.usedClues[clueKey]) {
+                        cell.classList.add('used');
+                        cell.innerText = '';
+                    } else {
+                        cell.innerText = `$${value}`;
+                        cell.onclick = () => openClue(cIdx, r, value);
+                    }
+                    board.appendChild(cell);
+                });
             }
-        ],
-        finalJeopardy: {
-            q: "What was the name of the Jewish family that led the revolt against the Seleucid Greeks?",
-            a: "The Maccabees."
-        },
-        usedClues: {},
-        finalUsed: false
-    };
 
-    let currentClueValue = 0;
-    let isFinalJeopardy = false;
-    let finalWagers = {};
+            const finalBtn = document.getElementById('final-jeopardy-trigger');
+            if (gameData.finalUsed) {
+                finalBtn.classList.add('used');
+                finalBtn.innerText = '⭐ FINAL JEOPARDY (Played) ⭐';
+            } else {
+                finalBtn.classList.remove('used');
+                finalBtn.innerText = '⭐ FINAL JEOPARDY ⭐';
+            }
+        }
 
-    // --- AUDIO ENGINE FOR FINAL JEOPARDY THEME ---
-    let audioCtx = null;
+        function renderScoreboard() {
+            const sb = document.getElementById('scoreboard');
+            sb.innerHTML = '';
+            gameData.teams.forEach((team, idx) => {
+                const card = document.createElement('div');
+                card.className = 'team-card';
+                card.innerHTML = `
+                    <div class="team-name" onclick="editTeamName(${idx})">${team.name} ✏️</div>
+                    <div class="team-score">$${team.score}</div>
+                    <div class="score-buttons">
+                        <button onclick="adjustScore(${idx}, -100)">-</button>
+                        <button onclick="adjustScore(${idx}, 100)">+</button>
+                    </div>
+                `;
+                sb.appendChild(card);
+            });
+        }
 
-    function playFinalJeopardyTheme() {
-        stopFinalJeopardyTheme();
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContext();
+        function adjustScore(teamIdx, amount) {
+            gameData.teams[teamIdx].score += amount;
+            saveState();
+            renderScoreboard();
+        }
 
-        const beat = 0.45; // tempo (~133 BPM)
-        const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, Bb4 = 466.16, B4 = 493.88;
-        const C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99, A5 = 880.00;
+        function editTeamName(teamIdx) {
+            const newName = prompt("Enter new team name:", gameData.teams[teamIdx].name);
+            if (newName !== null && newName.trim() !== "") {
+                gameData.teams[teamIdx].name = newName.trim();
+                saveState();
+                renderScoreboard();
+            }
+        }
 
-        const melody = [
-            // Phrase 1
-            [G4, 1], [C5, 1], [G4, 1], [C4, 1],
-            [G4, 1], [C5, 1], [G4, 2],
-            [G4, 1], [C5, 1], [G4, 1], [C5, 1],
-            [E5, 1.5], [D5, 0.5], [C5, 0.5], [B4, 0.5], [A4, 0.5], [G4, 0.5],
-            // Phrase 2
-            [G4, 1], [C5, 1], [G4, 1], [C4, 1],
-            [G4, 1], [C5, 1], [G4, 2],
-            [C5, 1.5], [A4, 0.5], [G4, 1], [F4, 1],
-            [E4, 1], [D4, 1], [C4, 2],
-            // Phrase 3 (Key change up a whole step)
-            [A4, 1], [D5, 1], [A4, 1], [D4, 1],
-            [A4, 1], [D5, 1], [A4, 2],
-            [A4, 1], [D5, 1], [A4, 1], [D5, 1],
-            [F5, 1.5], [E5, 0.5], [D5, 0.5], [C5, 0.5], [Bb4, 0.5], [A4, 0.5],
-            // Phrase 4 (Ending)
-            [A4, 1], [D5, 1], [A4, 1], [D4, 1],
-            [A4, 1], [D5, 1], [A4, 2],
-            [D5, 1.5], [B
+        function openClue(cIdx, rIdx, value) {
+            const clueKey = `${cIdx}-${rIdx}`;
+            gameData.usedClues[clueKey] = true;
+            saveState();
+            renderBoard();
+
+            currentClueValue = value;
+            isFinalJeopardy = false;
+            const cat = gameData.categories[cIdx];
+            const clue = cat.questions[rIdx];
+
+            document.getElementById('modal-category-title').innerText = `${cat.name} - $${value}`;
+            document.getElementById('modal-question-text').innerText = clue.q;
+            document.getElementById('modal-answer-text').innerText = clue.a;
+            
+            resetModalView();
+            document.getElementById('question-modal').style.display = 'flex';
+        }
+
+        function openFinalJeopardy() {
+            finalWagers = {};
+            gameData.teams.forEach((team, idx) => {
+                let maxWager = team.score > 0 ? team.score : 0;
+                let promptMsg = `${team.name}, you have $${team.score}.\nEnter your Final Jeopardy wager (0 to $${maxWager}):`;
+                let wagerInput = prompt(promptMsg, "0");
+                
+                let wager = parseInt(wagerInput);
+                if (isNaN(wager) || wager < 0) wager = 0;
+                if (wager > maxWager) wager = maxWager;
+                
+                finalWagers[idx] = wager;
+            });
+
+            gameData.finalUsed = true;
+            saveState();
+            renderBoard();
+
+            isFinalJeopardy = true;
+            document.getElementById('modal-category-title').innerText = "⭐ FINAL JEOPARDY ⭐";
+            document.getElementById('modal-question-text').innerText = gameData.finalJeopardy.q;
+            document.getElementById('modal-answer-text').innerText = gameData.finalJeopardy.a;
+            
+            resetModalView();
+            document.getElementById('question-modal').style.display = 'flex';
+        }
+
+        function resetModalView() {
+            document.getElementById('answer-container').style.display = 'none';
+            document.getElementById('reveal-btn').style.display = 'inline-block';
+            document.getElementById('close-modal-btn').style.display = 'none';
+        }
+
+        function revealAnswer() {
+            document.getElementById('answer-container').style.display = 'block';
+            document.getElementById('reveal-btn').style.display = 'none';
+            document.getElementById('close-modal-btn').style.display = 'inline-block';
+
+            const container = document.getElementById('award-buttons-container');
+            const instructions = document.getElementById('award-instructions');
+            container.innerHTML = '';
+
+            if (isFinalJeopardy) {
+                instructions.innerText = "GRADE FINAL JEOPARDY WAGERS:";
+                gameData.teams.forEach((team, idx) => {
+                    let wager = finalWagers[idx] || 0;
+                    
+                    const correctBtn = document.createElement('button');
+                    correctBtn.className = 'award-btn';
+                    correctBtn.style.backgroundColor = '#2ecc71';
+                    correctBtn.innerText = `✔️ ${team.name} Correct (+$${wager})`;
+                    correctBtn.onclick = () => resolveFinalWager(idx, true);
+
+                    const wrongBtn = document.createElement('button');
+                    wrongBtn.className = 'award-btn';
+                    wrongBtn.style.backgroundColor = '#e74c3c';
+                    wrongBtn.innerText = `❌ ${team.name} Wrong (-$${wager})`;
+                    wrongBtn.onclick = () => resolveFinalWager(idx, false);
+
+                    container.appendChild(correctBtn);
+                    container.appendChild(wrongBtn);
+                });
+
+                const closeFjBtn = document.createElement('button');
+                closeFjBtn.className = 'award-btn nobody';
+                closeFjBtn.innerText = 'Done Grading / Close';
+                closeFjBtn.onclick = () => closeModal();
+                container.appendChild(closeFjBtn);
+
+            } else {
+                instructions.innerText = "AWARD POINTS TO:";
+                gameData.teams.forEach((team, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'award-btn';
+                    btn.innerText = `+ $${currentClueValue} to ${team.name}`;
+                    btn.onclick = () => awardPointsAndClose(idx);
+                    container.appendChild(btn);
+                });
+
+                const nobodyBtn = document.createElement('button');
+                nobodyBtn.className = 'award-btn nobody';
+                nobodyBtn.innerText = 'Nobody Got It Right (0 Points)';
+                nobodyBtn.onclick = () => closeModal();
+                container.appendChild(nobodyBtn);
+            }
+        }
+
+        function awardPointsAndClose(teamIdx) {
+            gameData.teams[teamIdx].score += currentClueValue;
+            saveState();
+            renderScoreboard();
+            closeModal();
+        }
+
+        function resolveFinalWager(teamIdx, isCorrect) {
+            let wager = finalWagers[teamIdx] || 0;
+            if (isCorrect) {
+                gameData.teams[teamIdx].score += wager;
+            } else {
+                gameData.teams[teamIdx].score -= wager;
+            }
+            saveState();
+            renderScoreboard();
+            
+            event.target.parentElement.querySelectorAll(`button`).forEach(btn => {
+                if(btn.innerText.includes(gameData.teams[teamIdx].name)) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.4';
+                }
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('question-modal').style.display = 'none';
+        }
+
+        function resetGame() {
+            if (confirm("Are you sure you want to reset all scores and revealed clues?")) {
+                gameData.usedClues = {};
+                gameData.finalUsed = false;
+                gameData.teams.forEach(t => t.score = 0);
+                saveState();
+                renderBoard();
+            }
+        }
+
+        function openEditor() {
+            const container = document.getElementById('editor-fields');
+            let html = `
+                <div class="editor-group">
+                    <label>⭐ Final Jeopardy Question:</label>
+                    <input type="text" id="fj-q" value="${escapeHtml(gameData.finalJeopardy.q)}">
+                    <label>⭐ Final Jeopardy Answer:</label>
+                    <input type="text" id="fj-a" value="${escapeHtml(gameData.finalJeopardy.a)}">
+                </div>
+            `;
+
+            gameData.categories.forEach((cat, cIdx) => {
+                html += `<div class="editor-group">
+                    <label>Category ${cIdx + 1} Name:</label>
+                    <input type="text" id="cat-name-${cIdx}" value="${escapeHtml(cat.name)}">`;
+                
+                cat.questions.forEach((item, qIdx) => {
+                    const val = (qIdx + 1) * 100;
+                    html += `
+                        <label>$${val} Question:</label>
+                        <input type="text" id="cat-${cIdx}-q-${qIdx}" value="${escapeHtml(item.q)}">
+                        <label>$${val} Answer:</label>
+                        <input type="text" id="cat-${cIdx}-a-${qIdx}" value="${escapeHtml(item.a)}">
+                    `;
+                });
+                html += `</div>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('editor-modal').style.display = 'flex';
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-modal').style.display = 'none';
+        }
+
+        function saveEditor() {
+            const fjQ = document.getElementById('fj-q');
+            const fjA = document.getElementById('fj-a');
+            if (fjQ) gameData.finalJeopardy.q = fjQ.value;
+            if (fjA) gameData.finalJeopardy.a = fjA.value;
+
+            gameData.categories.forEach((cat, cIdx) => {
+                const catNameInput = document.getElementById(`cat-name-${cIdx}`);
+                if (catNameInput) cat.name = catNameInput.value;
+
+                cat.questions.forEach((item, qIdx) => {
+                    const qInput = document.getElementById(`cat-${cIdx}-q-${qIdx}`);
+                    const aInput = document.getElementById(`cat-${cIdx}-a-${qIdx}`);
+                    if (qInput) item.q = qInput.value;
+                    if (aInput) item.a = aInput.value;
+                });
+            });
+
+            saveState();
+            closeEditor();
+            renderBoard();
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/"/g, '&quot;');
+        }
+
+        renderBoard();
+    </script>
+</body>
+</html>
