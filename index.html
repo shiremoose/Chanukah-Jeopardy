@@ -440,7 +440,6 @@
         let currentClueValue = 0;
         let isFinalJeopardy = false;
         let finalWagers = {};
-        let activeAudioTimeout = null;
 
         if (localStorage.getItem('chanukah_jeopardy_live_data')) {
             try {
@@ -544,54 +543,6 @@
             document.getElementById('question-modal').style.display = 'flex';
         }
 
-        // Web Audio API Synthesizer for the Final Jeopardy Thinking Theme
-        function playFinalJeopardyTheme() {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
-
-                // Notes frequencies (Hz) for the classic thinking theme motif
-                // G4, C5, G4, D5, C5, Bb4, A4, G4 ...
-                const notes = [
-                    { freq: 392.00, duration: 0.35 }, // G4
-                    { freq: 523.25, duration: 0.35 }, // C5
-                    { freq: 392.00, duration: 0.35 }, // G4
-                    { freq: 587.33, duration: 0.35 }, // D5
-                    { freq: 523.25, duration: 0.35 }, // C5
-                    { freq: 466.16, duration: 0.35 }, // Bb4
-                    { freq: 440.00, duration: 0.35 }, // A4
-                    { freq: 392.00, duration: 0.70 }, // G4
-                ];
-
-                let startTime = ctx.currentTime + 0.1;
-                
-                // Play loop twice to match the classic length
-                for (let loop = 0; loop < 2; loop++) {
-                    notes.forEach(n => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        
-                        osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(n.freq, startTime);
-                        
-                        gain.gain.setValueAtTime(0.15, startTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + n.duration - 0.05);
-                        
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        
-                        osc.start(startTime);
-                        osc.stop(startTime + n.duration);
-                        
-                        startTime += n.duration;
-                    });
-                }
-            } catch (e) {
-                console.log("Audio autoplay prevented or not supported", e);
-            }
-        }
-
         function openFinalJeopardy() {
             finalWagers = {};
             gameData.teams.forEach((team, idx) => {
@@ -617,9 +568,6 @@
             
             resetModalView();
             document.getElementById('question-modal').style.display = 'flex';
-
-            // Trigger the theme song
-            playFinalJeopardyTheme();
         }
 
         function resetModalView() {
@@ -631,3 +579,159 @@
         function revealAnswer() {
             document.getElementById('answer-container').style.display = 'block';
             document.getElementById('reveal-btn').style.display = 'none';
+            document.getElementById('close-modal-btn').style.display = 'inline-block';
+
+            const container = document.getElementById('award-buttons-container');
+            const instructions = document.getElementById('award-instructions');
+            container.innerHTML = '';
+
+            if (isFinalJeopardy) {
+                instructions.innerText = "GRADE FINAL JEOPARDY WAGERS:";
+                gameData.teams.forEach((team, idx) => {
+                    let wager = finalWagers[idx] || 0;
+                    
+                    const correctBtn = document.createElement('button');
+                    correctBtn.className = 'award-btn';
+                    correctBtn.style.backgroundColor = '#2ecc71';
+                    correctBtn.innerText = `✔️ ${team.name} Correct (+$${wager})`;
+                    correctBtn.onclick = () => resolveFinalWager(idx, true);
+
+                    const wrongBtn = document.createElement('button');
+                    wrongBtn.className = 'award-btn';
+                    wrongBtn.style.backgroundColor = '#e74c3c';
+                    wrongBtn.innerText = `❌ ${team.name} Wrong (-$${wager})`;
+                    wrongBtn.onclick = () => resolveFinalWager(idx, false);
+
+                    container.appendChild(correctBtn);
+                    container.appendChild(wrongBtn);
+                });
+
+                const closeFjBtn = document.createElement('button');
+                closeFjBtn.className = 'award-btn nobody';
+                closeFjBtn.innerText = 'Done Grading / Close';
+                closeFjBtn.onclick = () => closeModal();
+                container.appendChild(closeFjBtn);
+
+            } else {
+                instructions.innerText = "AWARD POINTS TO:";
+                gameData.teams.forEach((team, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'award-btn';
+                    btn.innerText = `+ $${currentClueValue} to ${team.name}`;
+                    btn.onclick = () => awardPointsAndClose(idx);
+                    container.appendChild(btn);
+                });
+
+                const nobodyBtn = document.createElement('button');
+                nobodyBtn.className = 'award-btn nobody';
+                nobodyBtn.innerText = 'Nobody Got It Right (0 Points)';
+                nobodyBtn.onclick = () => closeModal();
+                container.appendChild(nobodyBtn);
+            }
+        }
+
+        function awardPointsAndClose(teamIdx) {
+            gameData.teams[teamIdx].score += currentClueValue;
+            saveState();
+            renderScoreboard();
+            closeModal();
+        }
+
+        function resolveFinalWager(teamIdx, isCorrect) {
+            let wager = finalWagers[teamIdx] || 0;
+            if (isCorrect) {
+                gameData.teams[teamIdx].score += wager;
+            } else {
+                gameData.teams[teamIdx].score -= wager;
+            }
+            saveState();
+            renderScoreboard();
+            
+            event.target.parentElement.querySelectorAll(`button`).forEach(btn => {
+                if(btn.innerText.includes(gameData.teams[teamIdx].name)) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.4';
+                }
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('question-modal').style.display = 'none';
+        }
+
+        function resetGame() {
+            if (confirm("Are you sure you want to reset all scores and revealed clues?")) {
+                gameData.usedClues = {};
+                gameData.finalUsed = false;
+                gameData.teams.forEach(t => t.score = 0);
+                saveState();
+                renderBoard();
+            }
+        }
+
+        function openEditor() {
+            const container = document.getElementById('editor-fields');
+            let html = `
+                <div class="editor-group">
+                    <label>⭐ Final Jeopardy Question:</label>
+                    <input type="text" id="fj-q" value="${escapeHtml(gameData.finalJeopardy.q)}">
+                    <label>⭐ Final Jeopardy Answer:</label>
+                    <input type="text" id="fj-a" value="${escapeHtml(gameData.finalJeopardy.a)}">
+                </div>
+            `;
+
+            gameData.categories.forEach((cat, cIdx) => {
+                html += `<div class="editor-group">
+                    <label>Category ${cIdx + 1} Name:</label>
+                    <input type="text" id="cat-name-${cIdx}" value="${escapeHtml(cat.name)}">`;
+                
+                cat.questions.forEach((item, qIdx) => {
+                    const val = (qIdx + 1) * 100;
+                    html += `
+                        <label>$${val} Question:</label>
+                        <input type="text" id="cat-${cIdx}-q-${qIdx}" value="${escapeHtml(item.q)}">
+                        <label>$${val} Answer:</label>
+                        <input type="text" id="cat-${cIdx}-a-${qIdx}" value="${escapeHtml(item.a)}">
+                    `;
+                });
+                html += `</div>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('editor-modal').style.display = 'flex';
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-modal').style.display = 'none';
+        }
+
+        function saveEditor() {
+            const fjQ = document.getElementById('fj-q');
+            const fjA = document.getElementById('fj-a');
+            if (fjQ) gameData.finalJeopardy.q = fjQ.value;
+            if (fjA) gameData.finalJeopardy.a = fjA.value;
+
+            gameData.categories.forEach((cat, cIdx) => {
+                const catNameInput = document.getElementById(`cat-name-${cIdx}`);
+                if (catNameInput) cat.name = catNameInput.value;
+
+                cat.questions.forEach((item, qIdx) => {
+                    const qInput = document.getElementById(`cat-${cIdx}-q-${qIdx}`);
+                    const aInput = document.getElementById(`cat-${cIdx}-a-${qIdx}`);
+                    if (qInput) item.q = qInput.value;
+                    if (aInput) item.a = aInput.value;
+                });
+            });
+
+            saveState();
+            closeEditor();
+            renderBoard();
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/"/g, '&quot;');
+        }
+
+        renderBoard();
+    </script>
+</body>
+</html>
