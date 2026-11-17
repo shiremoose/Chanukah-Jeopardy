@@ -451,7 +451,6 @@
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContext();
 
-        // Classic 30-second Final Jeopardy "Think!" melody (frequencies in Hz, duration in beats)
         const beat = 0.45; // tempo (~133 BPM)
         const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, Bb4 = 466.16, B4 = 493.88;
         const C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99, A5 = 880.00;
@@ -475,68 +474,4 @@
             // Phrase 4 (Ending)
             [A4, 1], [D5, 1], [A4, 1], [D4, 1],
             [A4, 1], [D5, 1], [A4, 2],
-            [D5, 1.5], [B4, 0.5], [A4, 1], [G4, 1],
-            [F4, 1], [E4, 1], [D4, 2]
-        ];
-
-        let time = audioCtx.currentTime + 0.1;
-
-        melody.forEach(([freq, beats]) => {
-            const duration = beats * beat;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = 'triangle'; // Soft, marimba/bell-like tone
-            osc.frequency.setValueAtTime(freq, time);
-
-            gain.gain.setValueAtTime(0.001, time);
-            gain.gain.exponentialRampToValueAtTime(0.25, time + 0.03);
-            gain.gain.exponentialRampToValueAtTime(0.001, time + duration * 0.92);
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start(time);
-            osc.stop(time + duration);
-
-            time += duration;
-        });
-    }
-
-    function stopFinalJeopardyTheme() {
-        if (audioCtx) {
-            audioCtx.close();
-            audioCtx = null;
-        }
-    }
-    // ---------------------------------------------
-
-    if (localStorage.getItem('chanukah_jeopardy_live_data')) {
-        try {
-            gameData = JSON.parse(localStorage.getItem('chanukah_jeopardy_live_data'));
-        } catch (e) { console.error(e); }
-    }
-
-    function saveState() {
-        localStorage.setItem('chanukah_jeopardy_live_data', JSON.stringify(gameData));
-    }
-
-    function renderBoard() {
-        renderScoreboard();
-        const board = document.getElementById('game-board');
-        board.innerHTML = '';
-
-        gameData.categories.forEach((cat) => {
-            const header = document.createElement('div');
-            header.className = 'category-header';
-            header.innerText = cat.name;
-            board.appendChild(header);
-        });
-
-        for (let r = 0; r < 5; r++) {
-            const value = (r + 1) * 100;
-            gameData.categories.forEach((cat, cIdx) => {
-                const cell = document.createElement('div');
-                const clueKey = `${cIdx}-${r}`;
-                cell.className = 'clue-cell';
-                if (gameData.usedClues[clueKey]) {
+            [D5, 1.5], [B
